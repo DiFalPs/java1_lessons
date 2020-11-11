@@ -1,85 +1,135 @@
-package lesson4;
+package ru.geekbrains.jalgoritmi.lessons;
 
+import java.util.Arrays;
 
 public class Main {
-    static Object obj = new Object();
-    static volatile String firstSym = "A";
+    private static class Stack {
+        private int[] stack;
+        private int head;
 
-    public static void main (String[] args) {
-        Thread t1 = new Thread(new Threads("A", "B"));
-        t1.start();
+        public Stack(int size) {
+            this.stack = new int[size];
+            this.head = -1;
+        }
 
-        Thread t2 = new Thread(new Threads("B", "C"));
-        t2.start();
+        public boolean isEmpty() {
+            return head == -1;
+        }
 
-        Thread t3 = new Thread(new Threads("C", "A"));
-        t3.start();
+        public boolean isFull() {
+            return head == stack.length - 1;
+        }
 
-        Thread test1 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < 5; i++) {
-                    synchronized (obj) {
-                        try {
-                            while (firstSym != "A")
-                                obj.wait();
-                            System.out.print("A");
-                            firstSym = "B";
-                            obj.notifyAll();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-        });
-        test1.start();
+        public boolean push(int i) {
+            if (isFull()) return false;
+            stack[++head] = i;
+            return true;
+        }
 
-        Thread test2 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < 5; i++) {
-                    synchronized (obj) {
-                        try {
-                            while (firstSym != "B")
-                                obj.wait();
-                            System.out.print("B");
-                            firstSym = "C";
-                            obj.notifyAll();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-        });
-        test2.start();
+        public int pop() throws RuntimeException {
+            if (isEmpty()) throw new RuntimeException("Stack is empty");
+            return stack[head--];
+        }
 
-        Thread test3 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < 5; i++) {
-                    synchronized (obj) {
-                        try {
-                            while (firstSym != "C")
-                                obj.wait();
-                            System.out.print("C");
-                            firstSym = "A";
-                            obj.notifyAll();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-        });
-        test3.start();
+        public int peek() throws RuntimeException {
+            if (isEmpty()) throw new RuntimeException("Stack is empty");
+            return stack[head];
+        }
 
     }
 
+    private static int checkBrackets(String input) {
+        int size = input.length();
+        Stack st = new Stack(size);
+        for (int i = 0; i < size; i++) {
+            char ch = input.charAt(i);
+            if (ch == '[' || ch == '(' || ch == '<' || ch == '{') {
+                st.push(ch);
+            } else if (ch == ']' || ch == ')' || ch == '>' || ch == '}') {
+                if (st.isEmpty())
+                    return i;
+
+                char op = (char) st.pop();
+                if (!((op == '[' && ch == ']') ||
+                        (op == '{' && ch == '}') ||
+                        (op == '(' && ch == ')') ||
+                        (op == '<' && ch == '>'))) {
+                    return i;
+                }
+            }
+        }
+        if (!st.isEmpty()) {
+            return size;
+        }
+        return -1;
+    }
+
+    private static class Queue {
+        private int[] queue;
+        private int head;
+        private int tail;
+        private int capacity;
+
+        public Queue(int initial) {
+            queue = new int[initial];
+            head = 0;
+            tail = -1;
+            capacity = 0;
+        }
+
+        public boolean isEmpty() {
+            return capacity == 0;
+        }
+
+        public boolean isFull() {
+            return capacity == queue.length;
+        }
+
+        public int length() {
+            return capacity;
+        }
+
+        public void insert(int i) {
+            if (isFull())
+                throw new RuntimeException("Queue is full!");
+            if (tail == queue.length -1)
+                tail = -1;
+            queue[++tail] = i;
+            capacity++;
+        }
+
+        public int remove() {
+            if (isEmpty()) throw new RuntimeException("Queue is empty");
+            int temp = queue[head++];
+            head %= queue.length; //if (head == queue.length) head = 0;
+            capacity--;
+            return temp;
+        }
+
+    }
+
+    private static int reverse(String symbols) {
+        int size = symbols.length();
+        Stack stack = new Stack(size);
+        String str = "";
+        for (int i = 0; i < size; i++){
+            str = symbols.charAt(i)+ str;
+            int tmp = Integer.parseInt(str);
+            stack.push(tmp);
+        }
+        stack.peek();
+        return -1;
+    }
+
+    public static void main(String[] args) {
+//        System.out.println(checkBrackets("<> () [] {} {[() <>]}"));
+        System.out.println(reverse("12345"));
 
 
 
 
 
+        //Deque
+        //Priority Queue
+    }
 }
